@@ -8,9 +8,11 @@ locals {
   #   "23" = [1,1]
   # }
 
-  cidr = "10.0.0.0/15"
+  cidr = "10.0.0.0/12"
+  divider = 22
   bitmask = split("/", local.cidr)[1]
-  split = local.bitmask >= 24 ? [] : [ for x in range(pow(2, (24 - local.bitmask + 1))) : 24 - local.bitmask + 1]
+  split = local.bitmask >= local.divider ? [] : [ for x in range(pow(2, (local.divider - local.bitmask))) : local.divider - local.bitmask]
+
   cidrs = length(local.split)  == 0 ? [local.cidr] : cidrsubnets(local.cidr, local.split...)
 
   ip_addresses = flatten([ for cidr in local.cidrs : [
@@ -20,9 +22,13 @@ locals {
 
 }
 
-# output "test" {
-#   value = range(20 - local.bitmask)
-# }
+output "ip_addresses" {
+  value = length(local.ip_addresses)
+}
+
+output "test" {
+  value = pow(2, (local.divider - local.bitmask))
+}
 
 # output "bitmask" {
 #   value = local.bitmask
@@ -33,10 +39,7 @@ locals {
 # }
 
 output "cidrs" {
-  value = local.cidrs
+  value = length(local.cidrs)
 }
 
-output "ip_addresses" {
-  value = length(local.ip_addresses)
-}
 
